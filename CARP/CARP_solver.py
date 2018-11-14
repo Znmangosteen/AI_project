@@ -1,6 +1,7 @@
 import numpy as np
 import random
-import sys
+import sys, time
+
 
 # def pathScanning(depot, d, capacity, require_demand: dict,require_cost):
 def pathScanning():
@@ -22,14 +23,31 @@ def pathScanning():
                     continue
                 else:
                     a = u[0]
-                    b = u[1]
                     if dist[i, a] < d:
                         d = dist[i, a]
                         u_next = u
-                    elif dist[i, a] == d and better():
-                        u_next = u
+                    elif dist[i, a] == d or (dist[i, a] < 0.9 * d and random.random() > 0.5):
+                        judge = False
+                        type = random.randint(1, 5)
+
+                        if type == 1:
+                            judge = better1(dist[u[0], depot], dist[u_next[0], depot])
+                        elif type == 2:
+                            judge = better2(dist[u[0], depot], dist[u_next[0], depot])
+                        elif type == 3:
+                            judge = better3(require_demand[u] / require_cost[u], require_demand[u] / require_cost[u])
+                        elif type == 4:
+                            judge = better4(require_demand[u] / require_cost[u], require_demand[u] / require_cost[u])
+                        else:
+                            judge = better5(dist[u[0], depot], dist[u_next[0], depot], load, capacity)
+
+                        if judge:
+                            u_next = u
 
             if u_next != ():
+                if dist[i, depot] + dist[depot, u_next[0]] == dist[i, u_next[0]] and i != depot:
+                    print('yes')
+                    break
                 route.append(u_next)
                 load += require_demand[u_next]
                 cost += require_cost[u_next] + d
@@ -42,20 +60,38 @@ def pathScanning():
     return s, cost
 
 
-def better():
-    return True
+# 判断u是否比u_next好
+def better1(u_dist, u_next_dist):
+    return u_dist > u_next_dist
+
+
+def better2(u_dist, u_next_dist):
+    return u_dist < u_next_dist
+
+
+def better3(u_rate, u_next_rate):
+    return u_rate > u_next_rate
+
+
+def better4(u_rate, u_next_rate):
+    return u_rate < u_next_rate
+
+
+def better5(u_dist, u_next_dist, load, capacity):
+    is_better = u_dist > u_next_dist
+    if load < (capacity / 2):
+        return is_better
+    else:
+        return not is_better
 
 
 if __name__ == '__main__':
-    # file_name = 'data/egl-e1-A.dat'
-    # termination = 100
-    # random.seed = 0
+
     file_name = sys.argv[1]
     termination = sys.argv[3]
-    random.seed = sys.argv[5]
-    # print(file_name)
-    # print(termination)
-    # print(random.seed)
+    random.seed(sys.argv[5])
+
+    start_time = time.time()
 
     with open(file_name, 'r') as f:
         data = f.read().splitlines()
@@ -109,7 +145,14 @@ if __name__ == '__main__':
                 if dist[i, k] + dist[k, j] < dist[i, j]:
                     dist[i, j] = dist[i, k] + dist[k, j]
 
-    result, cost = pathScanning()
+    require_demand_copy = require_demand.copy()
+    result = []
+    cost = 1000000000000
+    for aaa in range(500):
+        result_t, cost_t = pathScanning()
+        require_demand = require_demand_copy.copy()
+        if cost_t < cost:
+            result, cost = result_t, cost_t
 
     output_l1 = 's '
     route = str(result)[1:-1]
@@ -119,3 +162,10 @@ if __name__ == '__main__':
     output_l2 = 'q ' + str(int(cost))
     print(output_l1)
     print(output_l2)
+
+    # while True:
+    #     time.sleep(0.2)
+    #     if time.time()-start_time>int(termination):
+    #         exit()
+    #     else:
+    #         print(time.time()-start_time)
