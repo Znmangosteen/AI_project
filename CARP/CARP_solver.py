@@ -8,7 +8,7 @@ def pathScanning():
     s = []
     cost = 0
     while require_demand != {}:
-        s.append(0)
+        # s.append(0)
         route = []
         i = depot
         load = 0
@@ -55,8 +55,8 @@ def pathScanning():
                 require_demand.pop((u_next[1], u_next[0]))
                 i = u_next[1]
         cost += dist[i, depot]
-        s.extend(route)
-        s.append(0)
+        s.append(route)
+        # s.append(0)
     return s, cost
 
 
@@ -84,6 +84,14 @@ def better5(u_dist, u_next_dist, load, capacity):
     else:
         return not is_better
 
+# 输出函数
+def s_format (s):
+    s_print = []
+    for p in s:
+        s_print.append(0)
+        s_print.extend(p)
+        s_print.append(0)
+    return s_print
 
 if __name__ == '__main__':
 
@@ -154,13 +162,14 @@ if __name__ == '__main__':
         if cost_t < cost:
             result, cost = result_t, cost_t
 
-    output_l1 = 's '
-    route = str(result)[1:-1]
-    route = route.replace(' ', '')
-    output_l1 += route
+    # output_l1 = 's '
+    # route = str(result)[1:-1]
+    # route = route.replace(' ', '')
+    # output_l1 += route
 
+    # print(output_l1)
+    print("s", (",".join(str(d) for d in s_format(result))).replace(" ", ""))
     output_l2 = 'q ' + str(int(cost))
-    print(output_l1)
     print(output_l2)
 
     # while True:
